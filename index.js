@@ -26,7 +26,7 @@ const functionRegist = (csrf, realCookie, email, reff) => new Promise((resolve, 
     params.append('_csrf', csrf);
     params.append('email', email);
     params.append('password', 'Berak321#');
-    params.append('referrer', 'cIk0lvfTv')
+    params.append('referrer', reff)
 
        fetch('https://zoogg.com/register', {
         method: 'POST', 
