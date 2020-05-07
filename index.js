@@ -5,6 +5,8 @@ var random = require('random-name')
 const { URLSearchParams } = require('url');
 const cheerio = require('cheerio');
 const rp = require('request-promise');
+const fs = require('fs-extra');
+const delay = require('delay')
 
 const getCookie = (reff) => new Promise((resolve, reject) => {
     fetch(`https://zoogg.com/register?referrer=${reff}`, {
@@ -91,6 +93,35 @@ const functionVeryf = (url) => new Promise((resolve, rejected) => {
         });
 });
 
+const getWallet = (realCookie) => new Promise((resolve, reject) => {
+    fetch(`https://zoogg.com/wallet`, {
+        method: 'GET',
+        headers: {
+            'Host': 'zoogg.com',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': 1,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-User': '?1',
+            'Sec-Fetch-Dest': 'document',
+            'Referer': 'https://zoogg.com/exchange/ETH-BTC',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cookie': `${realCookie}`
+        }
+    }).then(async res => {
+        const $ = cheerio.load(await res.text());
+        const result = {
+            token: $('h5[class=mb-0]').text()
+        }
+
+        resolve(result)
+    })
+    .catch(err => reject(err))
+});
+
 
 (async () => {
     const reff = readlineSync.question('[?] Reff Code: ')
@@ -112,12 +143,16 @@ const functionVeryf = (url) => new Promise((resolve, rejected) => {
         if(regist){
             console.log('[!] Success')
             console.log('[!] Trying get link...')
+            await delay (3000)
             const get = await functionGetLink(`${nama}${rand}`)
             if(get){
                 console.log(`[!] Success => ${get}`)
                 console.log('[!] Trying verify')
                 const verif = await functionVeryf(get)
                 console.log('[!] Verified\n')
+                await fs.appendFile('email.txt', `${email}`+'\r\n', err => {
+                    if (err) throw err;
+                })
             } else {
                 console.log('[!] Failed getting link\n')
             }
@@ -129,3 +164,5 @@ const functionVeryf = (url) => new Promise((resolve, rejected) => {
     }
 }
 })()
+
+// cIk0lvfTv
